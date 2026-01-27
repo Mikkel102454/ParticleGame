@@ -1,0 +1,13 @@
+//
+// Created by mikkel on 1/27/2026.
+//
+
+#ifndef UNA_LIQUID_H
+#define UNA_LIQUID_H
+#include "game/world/element.h"
+
+typedef struct Liquid : Element {
+
+} Liquid;
+
+#endif //UNA_LIQUID_H
