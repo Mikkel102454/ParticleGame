@@ -1,50 +1,50 @@
 #include "game/world/elements/solid/movable/sand.h"
 
+#include <iostream>
+#include <ostream>
+
+#include "game/utils/random.h"
+#include "game/world/elements/liquid/water.h"
+
 void Sand::Step() {
-    if (y >= GetScreenHeight()) {
-        active = false;
+    if (!world->IsInsideBounds(x, y + 1)) {
         return;
     }
 
-    int prevX, prevY;
-    prevX = x;
-    prevY = y;
-
-    bool moved = false;
-
-    if (world->map[x * world->height + y + 1] == nullptr) {
-        world->map[x * world->height + y + 1] = this;
-        world->map[x * world->height + y] = nullptr;
-
-        y += 1;
-        moved = true;
-    }
-    else if (world->directionPrefer == 1) {
-        if (!goDiagonal(1)) {
-            if (goDiagonal(-1)) moved = true;
-        } else moved = true;
-    } else {
-        if (!goDiagonal(-1)) {
-            if (goDiagonal(1)) moved = true;
-        } else moved = true;
+    if (world->GetElement(x, y + 1) == nullptr) {
+        vY += world->gravity * GetFrameTime();
     }
 
-    if (!moved) {
-        active = false;
-        return;
+    int desiredPath[0];
+    world->ComputeTraverse(x, y, vX, vY, *desiredPath);
+
+    if (world->GetElement(x, y + 1) == nullptr) {
+        vY += world->gravity * GetFrameTime();
+
+        int pixelsToMove = std::ceil(vY);
+        for (int i = 0; i < pixelsToMove; i++) {
+            if (!world->IsInsideBounds(x, y + 1)) break;
+
+            if (world->GetElement(x, y + 1) == nullptr) {
+                world->SwapElement(x, y, x, y + 1);
+            };
+        }
+    }
+    else {
+        int direction = 1;
+        direction = random_val_int(0, 1) ? direction : -direction;
+        if (!goDiagonal(direction)) {
+            goDiagonal(-direction);
+        }
     }
 
-    Draw(prevX, prevY);
-    Update_Nearby();
+    //calculate physics
 }
 
 bool Sand::goDiagonal(int direction) {
-    if (x > 0 && x < world->width - 1 && world->map[(x + direction) * world->height + y + 1] == nullptr) {
-        world->map[(x + direction) * world->height + y + 1] = this;
-        world->map[x * world->height + y] = nullptr;
-
-        x += direction;
-        y += 1;
+    if (!world->IsInsideBounds(x + direction, y + 1)) return false;
+    if (world->GetElement(x + direction, y + 1) == nullptr) { //|| dynamic_cast<Water*>(world->Get_Element(x, y + 1)) != nullptr) {
+        world->SwapElement(x, y, x + direction, y + 1);
         return true;
     }
     return false;

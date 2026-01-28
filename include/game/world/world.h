@@ -16,19 +16,25 @@ typedef struct World {
 
     int width;
     int height;
+    float gravity = 10;
 
     Element** map;
-
-    std::list<Element*> blocks;
-    std::vector<Element*> activeBlocks;
 
     Image img;
     Texture texture;
 
-    int directionPrefer;
+    void SpawnElement(int x, int y, Element* element);
 
-    void Spawn_Element(int x, int y, Element* element);
-    void Delete_Element(int x, int y);
+    void DeleteElement(int x, int y);
+
+    Element* GetElement(int x, int y) const;
+
+    void SwapElement(int x1, int y1, int x2, int y2) const;
+
+    bool IsInsideBounds(int x, int y) const;
+    void SetElement(int x, int y, Element* element) const;
+
+    void ComputeTraverse(int x, int y, float vX, float vY, int& arr) const;
 } World;
 
 

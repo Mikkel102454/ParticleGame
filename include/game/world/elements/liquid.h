@@ -7,7 +7,7 @@
 #include "game/world/element.h"
 
 typedef struct Liquid : Element {
-
+    virtual int GetDispersionRate() const;
 } Liquid;
 
 #endif //UNA_LIQUID_H

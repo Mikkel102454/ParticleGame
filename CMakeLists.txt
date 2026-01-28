@@ -32,7 +32,6 @@ set(SOURCES
 )
 set(HEADERS
         include/game/world/world.h
-        src/utils/numbers.cpp
         include/game/utils/numbers.h
         include/game/world/element.h
         include/game/world/elements/solid.h
@@ -45,6 +44,13 @@ set(HEADERS
         src/world/element.cpp
         src/world/elements/liquid/water.cpp
         include/game/world/elements/liquid/water.h
+        src/world/elements/solid/unmoveable/wood.cpp
+        include/game/world/elements/solid/immovable/wood.h
+        src/utils/random.cpp
+        include/game/utils/random.h
+        src/devtools.cpp
+        include/game/devtools.h
+        include/game/utils/position.h
 )
 
 set(CMAKE_CXX_STANDARD 20)

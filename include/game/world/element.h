@@ -9,14 +9,17 @@ typedef struct Element {
     virtual void ReceiveHeat() = 0;
 
     void Draw(int prevX, int prevY) const;
-    void Update_Nearby() const;
 
     World* world;
 
     int x;
     int y;
 
-    bool active;
+    float vX;
+    float vY;
+    float mass;
+
+    bool hasSteppedThisFrame;
 
 } Element;
 

@@ -15,6 +15,10 @@ struct Water : Liquid {
         return;
     }
 
+    int GetDispersionRate() const override{
+        return 5;
+    }
+
     void Step() override;
 };
 

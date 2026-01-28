@@ -5,9 +5,11 @@
 #include <raylib.h>
 
 #include "../include/game/world/world.h"
+#include "game/devtools.h"
 #include "game/world/element.h"
 #include "game/utils/numbers.h"
 #include "game/world/elements/liquid/water.h"
+#include "game/world/elements/solid/immovable/wood.h"
 #include "game/world/elements/solid/movable/sand.h"
 
 //------------------------------------------------------------------------------------
@@ -18,7 +20,8 @@ int main()
 {
     enum Types {
         SAND,
-        WATER
+        WATER,
+        WOOD
     };
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -29,7 +32,7 @@ int main()
 
     InitWindow(screenWidth, screenHeight, "Uno");
 
-    SetTargetFPS(targetFps);               // Set our game to run at 120 frames-per-second
+    SetTargetFPS(targetFps);
     SetExitKey(KEY_NULL);
 
     World* world = new World();
@@ -45,24 +48,29 @@ int main()
     int startX = 0;
     int startY = 0;
 
+    int lastY = world->height - 1;
     Types spawnType = SAND;
     // Main game loop
     while (!WindowShouldClose())
     {
         if (IsKeyPressed(KEY_C)) spawnType = SAND;
         else if (IsKeyPressed(KEY_V)) spawnType = WATER;
+        else if (IsKeyPressed(KEY_B)) spawnType = WOOD;
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             int mx = GetMouseX();
             int my = GetMouseY();
 
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -5; dx <= 5; dx++) {
+                for (int dy = -5; dy <= 5; dy++) {
                     switch (spawnType) {
                         case SAND:
-                            world->Spawn_Element(mx + dx, my + dy, new Sand());
+                            world->SpawnElement(mx + dx, my + dy, new Sand());
                             break;
                         case WATER:
-                            world->Spawn_Element(mx + dx, my + dy, new Water());
+                            world->SpawnElement(mx + dx, my + dy, new Water());
+                            break;
+                        case WOOD:
+                            world->SpawnElement(mx + dx, my + dy, new Wood());
                             break;
                     }
                 }
@@ -84,37 +92,69 @@ int main()
 
             for (int x = minX; x <= maxX; x++) {
                 for (int y = minY; y <= maxY; y++) {
-                    world->Delete_Element(x, y);
+                    world->DeleteElement(x, y);
                 }
             }
         }
 
-        world->directionPrefer = randomChance(0.5f) ? 1 : 0;
-
-        std::sort(world->activeBlocks.begin(), world->activeBlocks.end(),
-            [](Element* a, Element* b) {
-                return a->y > b->y;
-            }
-        );
+        if (IsKeyPressed(KEY_F2)) {
+            if (Is_Devtool_Active()) Deactivate_Devtool();
+            else Activate_Devtool(world);
+        }
+        //Reset Updates
+        // Update
+        for (size_t i = world->width * world->height; i-- > 0; ) {
+            if (world->map[i] == nullptr) continue;
+            world->map[i]->hasSteppedThisFrame = false;
+        }
 
         // Update
-        for (size_t i = 0; i < world->activeBlocks.size(); ) {
-            Element* element = world->activeBlocks[i];
-            if (element == nullptr || !element->active) {
-                world->activeBlocks[i] = world->activeBlocks.back();
-                world->activeBlocks.pop_back();
-                continue;
-            }
+        static bool flip = false;
+        flip = !flip;
 
-            element->Step();
 
-            if (!element->active) {
-                world->activeBlocks[i] = world->activeBlocks.back();
-                world->activeBlocks.pop_back();
+        // if (IsKeyPressed(KEY_F)) {
+        //     if (!flip) {
+        //         for (int x = 0; x < world->width; ++x) {
+        //             size_t i = lastY * world->width + x;
+        //             if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
+        //             world->map[i]->hasSteppedThisFrame = true;
+        //             world->map[i]->Step();
+        //         }
+        //     } else {
+        //         for (int x = world->width - 1; x >= 0; --x) {
+        //             size_t i = lastY * world->width + x;
+        //             if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
+        //             world->map[i]->hasSteppedThisFrame = true;
+        //             world->map[i]->Step();
+        //         }
+        //     }
+        //     lastY--;
+        //     if (lastY < 0) lastY = world->height - 1;
+        // }
+        for (int y = world->height - 1; y >= 0; --y) {
+
+            if (!flip) {
+                for (int x = 0; x < world->width; ++x) {
+                    size_t i = y * world->width + x;
+                    if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
+                    world->map[i]->hasSteppedThisFrame = true;
+                    world->map[i]->Step();
+                }
             } else {
-                i++;
+                for (int x = world->width - 1; x >= 0; --x) {
+                    size_t i = y * world->width + x;
+                    if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
+                    world->map[i]->hasSteppedThisFrame = true;
+                    world->map[i]->Step();
+                }
             }
         }
+
+        if (Is_Devtool_Active()) {
+            Devtool_Tick();
+        }
+
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
@@ -129,7 +169,6 @@ int main()
         }
 
         DrawText(TextFormat("CURRENT FPS: %i", (int)(1/GetFrameTime())), GetScreenWidth() - 220, 40, 20, GREEN);
-        DrawText(TextFormat("ACTIVE PIXELS: %i", world->activeBlocks.size()), GetScreenWidth() - 220, 90, 20, GREEN);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
