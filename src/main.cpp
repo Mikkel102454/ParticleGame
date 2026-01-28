@@ -64,7 +64,7 @@ int main()
                 for (int dy = -5; dy <= 5; dy++) {
                     switch (spawnType) {
                         case SAND:
-                            world->SpawnElement(mx + dx, my + dy, new Sand());
+                            world->SpawnElement(mx, my, new Sand());
                             break;
                         case WATER:
                             world->SpawnElement(mx + dx, my + dy, new Water());

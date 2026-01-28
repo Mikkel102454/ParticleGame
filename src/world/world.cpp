@@ -3,6 +3,9 @@
 //
 
 #include "game/world/world.h"
+
+#include <cmath>
+
 #include "game/world/element.h"
 #include "game/world/elements/solid/movable/sand.h"
 
@@ -16,18 +19,18 @@ void World::SpawnElement(int x, int y, Element* element) {
     element->world = this;
 
     element->Draw(x, y);
-    map[x * height + y] = element;
+    map[x * width + y] = element;
 }
 
 Element* World::GetElement(int x, int y) const {
-    return map[x * height + y];
+    return map[x * width + y];
 }
-void World::SetElement(int x, int y, Element* element) const {
-    map[x * height + y] = element;
+Element* World::GetElement(int i) const {
+    return map[i];
 }
 
-void World::ConvertFromIndexToCoord(int index, int& x, int& y) const {
-    if (index < 0 || index >= height * width) return;
+void World::SetElement(int x, int y, Element* element) const {
+    map[x * width + y] = element;
 }
 
 void World::SwapElement(int x1, int y1, int x2, int y2) const {
@@ -54,8 +57,8 @@ void World::SwapElement(int x1, int y1, int x2, int y2) const {
 
 
 bool World::IsInsideBounds(int x, int y) const {
-    if (y >= height || y < 0) return false;
-    if (x >= width || x < 0) return false;
+    if (y >= width || y < 0) return false;
+    if (x >= height || x < 0) return false;
     return true;
 }
 
@@ -68,36 +71,75 @@ void World::DeleteElement(int x, int y) {
     SetElement(x, y, nullptr);
 }
 
-void World::ComputeTraverse(int x, int y, float vX, float vY, int& arr) const {
-    if (vY == 0) {
-        int amount = vX < 0 ? -1 : 1;
-        vX = vX < 0 ? -vX : vX;
+std::vector<int> World::ComputeTraverse(int x, int y, float vX, float vY) const
+{
+    std::vector<int> arr;
 
-        for (int i = 0; i < vY; i++) {
+    // Convert float movement to grid delta
+    int dx = (int)std::round(vX);
+    int dy = (int)std::round(vY);
+
+    if (dx == 0 && dy == 0)
+        return arr;
+
+    int stepX = dx < 0 ? -1 : 1;
+    int stepY = dy < 0 ? -1 : 1;
+
+    dx = std::abs(dx);
+    dy = std::abs(dy);
+
+    int index = 0;
+
+    //Left and right only
+    if (dx == 0) {
+        arr.resize(dy);
+        for (int i = 0; i < dy; i++) {
             int _x = x;
+            int _y = y + (i + 1) * stepY;
+            arr[index++] = _x * width + _y;
+        }
+        return arr;
+    }
+
+    //Up and down only
+    if (dy == 0) {
+        arr.resize(dx);
+        for (int i = 0; i < dx; i++) {
+            int _x = x + (i + 1) * stepX;
             int _y = y;
-            arr[i] = _x * height + _y;;
+            arr[index++] = _x * width + _y;
         }
-        return;
+        return arr;
     }
-    if (vX == 0) {
-        int amount = vX < 0 ? -1 : 1;
-        vX = vX < 0 ? -vX : vX;
 
-        for (int i = 0; i < vX; i++) {
-            arr[i] = x - amount * (i + 1);
+    if (dx >= dy) {
+        float slope = (float)dy / (float)dx;
+        float yAcc = 0.0f;
+
+        arr.resize(dx + 1);
+        for (int i = 0; i <= dx; i++) {
+            int _x = x + i * stepX;
+            int _y = y + (int)(yAcc + 0.5f) * stepY;
+            arr[index++] = _x * width + _y;
+            yAcc += slope;
         }
-        return;
+    } else {
+        float slope = (float)dx / (float)dy;
+        float xAcc = 0.0f;
+
+        arr.resize(dy + 1);
+        for (int i = 0; i <= dy; i++) {
+            int _x = x + (int)(xAcc + 0.5f) * stepX;
+            int _y = y + i * stepY;
+            arr[index++] = _x * width + _y;
+            xAcc += slope;
+        }
     }
 
-    float slope = (y + vY - y / (x + vX - x));
+    return arr;
+}
 
-    arr = new int[vX];
-    vX = vX < 0 ? -vX : vX;
-
-    for (int i = 0; i < vX; i++) {
-        int _x = x + i;
-        int _y = y + slope * i + 1;
-        arr[i] = _x * height + _y;
-    }
+void World::ConvertIndexToCoord(int i, int& x, int& y) const {
+    y = std::floor( i / width);
+    x = i % width;
 }

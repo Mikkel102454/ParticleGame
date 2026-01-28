@@ -28,13 +28,16 @@ typedef struct World {
     void DeleteElement(int x, int y);
 
     Element* GetElement(int x, int y) const;
+    Element* GetElement(int i) const;
 
     void SwapElement(int x1, int y1, int x2, int y2) const;
 
     bool IsInsideBounds(int x, int y) const;
     void SetElement(int x, int y, Element* element) const;
 
-    void ComputeTraverse(int x, int y, float vX, float vY, int& arr) const;
+    std::vector<int> ComputeTraverse(int x, int y, float vX, float vY) const;
+
+    void ConvertIndexToCoord(int i, int& x, int& y) const;
 } World;
 
 
