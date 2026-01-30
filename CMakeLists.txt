@@ -29,6 +29,12 @@ FetchContent_MakeAvailable(lua)
 set(SOURCES
         src/main.cpp
         src/world/world.cpp
+        src/utils/random.cpp
+        src/devtools.cpp
+        src/world/elements/liquid/water.cpp
+        src/world/element.cpp
+        src/world/elements/solid/movable/sand.cpp
+        src/world/elements/solid/unmoveable/wood.cpp
 )
 set(HEADERS
         include/game/world/world.h
@@ -40,17 +46,13 @@ set(HEADERS
         include/game/world/elements/solid/movable.h
         include/game/world/elements/solid/immovable.h
         include/game/world/elements/solid/movable/sand.h
-        src/world/elements/solid/movable/sand.cpp
-        src/world/element.cpp
-        src/world/elements/liquid/water.cpp
         include/game/world/elements/liquid/water.h
-        src/world/elements/solid/unmoveable/wood.cpp
+        include/game/world/elements/gas/smoke.h
         include/game/world/elements/solid/immovable/wood.h
-        src/utils/random.cpp
         include/game/utils/random.h
-        src/devtools.cpp
         include/game/devtools.h
         include/game/utils/position.h
+        src/world/elements/gas/smoke.cpp
 )
 
 set(CMAKE_CXX_STANDARD 20)

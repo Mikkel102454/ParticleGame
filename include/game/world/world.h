@@ -38,6 +38,8 @@ typedef struct World {
     std::vector<int> ComputeTraverse(int x, int y, float vX, float vY) const;
 
     void ConvertIndexToCoord(int i, int& x, int& y) const;
+
+    void ActivateArea(int x, int y) const;
 } World;
 
 

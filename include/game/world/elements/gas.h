@@ -7,7 +7,7 @@
 #include "game/world/element.h"
 
 typedef struct Gas : Element {
-
+    virtual int GetDispersionRate() const = 0;
 } Gas;
 
 #endif //UNA_GAS_H

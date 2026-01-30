@@ -1,26 +1,21 @@
-#include "game/world/elements/solid/movable/sand.h"
-
-#include <iostream>
-#include <ostream>
-#include <string>
+#include "game/world/elements/gas/smoke.h"
 
 #include "game/utils/random.h"
-#include "game/world/elements/liquid/water.h"
 
-void Water::Step() {
-    bool down      = world->IsInsideBounds(x, y + 1) && (world->GetElement(x, y + 1) == nullptr || world->GetElement(x, y + 1)->GetMass() < GetMass());
-    bool downLeft  = world->IsInsideBounds(x - 1, y + 1) && (world->GetElement(x - 1, y + 1) == nullptr || world->GetElement(x - 1, y + 1)->GetMass() < GetMass());
-    bool downRight = world->IsInsideBounds(x + 1, y + 1) && (world->GetElement(x + 1, y + 1) == nullptr || world->GetElement(x + 1, y + 1)->GetMass() < GetMass());
+void Smoke::Step() {
+    bool down      = world->IsInsideBounds(x, y - 1) && (world->GetElement(x, y - 1) == nullptr || world->GetElement(x, y - 1)->GetMass() < GetMass());
+    bool downLeft  = world->IsInsideBounds(x - 1, y - 1) && (world->GetElement(x - 1, y - 1) == nullptr || world->GetElement(x - 1, y - 1)->GetMass() < GetMass());
+    bool downRight = world->IsInsideBounds(x + 1, y - 1) && (world->GetElement(x + 1, y - 1) == nullptr || world->GetElement(x + 1, y - 1)->GetMass() < GetMass());
     bool left      = world->IsInsideBounds(x - 1, y) && world->GetElement(x - 1, y) == nullptr;
-    bool right     = world->IsInsideBounds(x + 1, y) && world->GetElement(x + 1, y) == nullptr;
+    bool right     = world->IsInsideBounds(x + 1, y) &&world->GetElement(x + 1, y) == nullptr;
 
 
     if (down) {
-        vY += world->gravity * GetFrameTime();
+        vY -= world->gravity * GetFrameTime();
     }
     else if (downLeft || downRight) {
         // Always falling if sliding diagonally
-        vY = 5;
+        vY = -5;
 
         if (downLeft && downRight) {
             vX = (random_val_int(0, 1)) ? -5.0f : 5.0f;
@@ -37,7 +32,7 @@ void Water::Step() {
             vX = (random_val_int(0, 1)) ? -static_cast<float>(GetDispersionRate()) : static_cast<float>(GetDispersionRate());
         }
         else if (left) {
-            vX = static_cast<float>(GetDispersionRate());
+            vX = -static_cast<float>(GetDispersionRate());
         }
         else {
             vX = static_cast<float>(GetDispersionRate());

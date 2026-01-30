@@ -2,17 +2,17 @@
 // Created by mikkel on 1/27/2026.
 //
 
-#ifndef UNA_WATER_H
-#define UNA_WATER_H
+#ifndef UNA_SMOKE_H
+#define UNA_SMOKE_H
 #include "raylib.h"
-#include "game/world/elements/liquid.h"
+#include "game/world/elements/gas.h"
 
-typedef struct Water : Liquid {
+typedef struct Smoke : Gas {
     Color GetColor() const override{
-        return BLUE;
+        return GRAY;
     }
     float GetMass() const override{
-        return 4.0f;
+        return 1.0f;
     }
 
     void ReceiveHeat() override{
@@ -20,10 +20,10 @@ typedef struct Water : Liquid {
     }
 
     int GetDispersionRate() const override{
-        return 10;
+        return 5;
     }
 
     void Step() override;
-} Water;
+} Smoke;
 
-#endif //UNA_WATER_H
+#endif //UNA_SMOKE_H

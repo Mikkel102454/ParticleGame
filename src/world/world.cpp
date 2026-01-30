@@ -17,20 +17,22 @@ void World::SpawnElement(int x, int y, Element* element) {
     element->x = x;
     element->y = y;
     element->world = this;
+    element->isActive = true;
 
     element->Draw(x, y);
-    map[x * width + y] = element;
+    map[y * width + x] = element;
+
 }
 
 Element* World::GetElement(int x, int y) const {
-    return map[x * width + y];
+    return map[y * width + x];
 }
 Element* World::GetElement(int i) const {
     return map[i];
 }
 
 void World::SetElement(int x, int y, Element* element) const {
-    map[x * width + y] = element;
+    map[y * width + x] = element;
 }
 
 void World::SwapElement(int x1, int y1, int x2, int y2) const {
@@ -57,8 +59,8 @@ void World::SwapElement(int x1, int y1, int x2, int y2) const {
 
 
 bool World::IsInsideBounds(int x, int y) const {
-    if (y >= width || y < 0) return false;
-    if (x >= height || x < 0) return false;
+    if (y >= height || y < 0) return false;
+    if (x >= width || x < 0) return false;
     return true;
 }
 
@@ -76,8 +78,8 @@ std::vector<int> World::ComputeTraverse(int x, int y, float vX, float vY) const
     std::vector<int> arr;
 
     // Convert float movement to grid delta
-    int dx = (int)std::round(vX);
-    int dy = (int)std::round(vY);
+    int dx = std::ceil(vX);
+    int dy = std::ceil(vY);
 
     if (dx == 0 && dy == 0)
         return arr;
@@ -91,47 +93,47 @@ std::vector<int> World::ComputeTraverse(int x, int y, float vX, float vY) const
     int index = 0;
 
     //Left and right only
-    if (dx == 0) {
-        arr.resize(dy);
-        for (int i = 0; i < dy; i++) {
-            int _x = x;
-            int _y = y + (i + 1) * stepY;
-            arr[index++] = _x * width + _y;
-        }
-        return arr;
-    }
-
-    //Up and down only
     if (dy == 0) {
         arr.resize(dx);
         for (int i = 0; i < dx; i++) {
             int _x = x + (i + 1) * stepX;
             int _y = y;
-            arr[index++] = _x * width + _y;
+            arr[index++] = _y * width + _x;
+        }
+        return arr;
+    }
+
+    //Up and down only
+    if (dx == 0) {
+        arr.resize(dy);
+        for (int i = 0; i < dy; i++) {
+            int _x = x;
+            int _y = y + (i + 1) * stepY;
+            arr[index++] = _y * width + _x;
         }
         return arr;
     }
 
     if (dx >= dy) {
         float slope = (float)dy / (float)dx;
-        float yAcc = 0.0f;
+        float yAcc = slope;
 
-        arr.resize(dx + 1);
-        for (int i = 0; i <= dx; i++) {
+        arr.resize(dx);
+        for (int i = 1; i <= dx; i++) {
             int _x = x + i * stepX;
             int _y = y + (int)(yAcc + 0.5f) * stepY;
-            arr[index++] = _x * width + _y;
+            arr[index++] = _y * width + _x;
             yAcc += slope;
         }
     } else {
         float slope = (float)dx / (float)dy;
-        float xAcc = 0.0f;
+        float xAcc = slope;
 
-        arr.resize(dy + 1);
-        for (int i = 0; i <= dy; i++) {
+        arr.resize(dy);
+        for (int i = 1; i <= dy; i++) {
             int _x = x + (int)(xAcc + 0.5f) * stepX;
             int _y = y + i * stepY;
-            arr[index++] = _x * width + _y;
+            arr[index++] = _y * width + _x;
             xAcc += slope;
         }
     }
@@ -142,4 +144,15 @@ std::vector<int> World::ComputeTraverse(int x, int y, float vX, float vY) const
 void World::ConvertIndexToCoord(int i, int& x, int& y) const {
     y = std::floor( i / width);
     x = i % width;
+}
+
+void World::ActivateArea(int x, int y) const {
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if (dy == 0 && dx == 0 || !IsInsideBounds(x + dx, y + dy)) continue;
+            Element* element = GetElement(x + dx, y + dy);
+            if (element == nullptr) continue;
+            element->isActive = true;
+        }
+    }
 }

@@ -6,6 +6,7 @@
 typedef struct Element {
     virtual void Step() = 0;
     virtual Color GetColor() const = 0;
+    virtual float GetMass() const = 0;
     virtual void ReceiveHeat() = 0;
 
     void Draw(int prevX, int prevY) const;
@@ -17,9 +18,9 @@ typedef struct Element {
 
     float vX;
     float vY;
-    float mass;
 
     bool hasSteppedThisFrame;
+    bool isActive;
 
 } Element;
 

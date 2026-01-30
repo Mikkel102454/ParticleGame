@@ -11,6 +11,9 @@ struct Wood : Immovable {
     Color GetColor() const override{
         return BROWN;
     }
+    float GetMass() const override{
+        return 10.0f;
+    }
 
     void ReceiveHeat() override{
         return;

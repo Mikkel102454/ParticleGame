@@ -4,10 +4,10 @@
 
 #include <raylib.h>
 
-#include "../include/game/world/world.h"
+#include "game/world/world.h"
 #include "game/devtools.h"
 #include "game/world/element.h"
-#include "game/utils/numbers.h"
+#include "game/world/elements/gas/smoke.h"
 #include "game/world/elements/liquid/water.h"
 #include "game/world/elements/solid/immovable/wood.h"
 #include "game/world/elements/solid/movable/sand.h"
@@ -21,7 +21,8 @@ int main()
     enum Types {
         SAND,
         WATER,
-        WOOD
+        WOOD,
+        SMOKE
     };
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -56,6 +57,7 @@ int main()
         if (IsKeyPressed(KEY_C)) spawnType = SAND;
         else if (IsKeyPressed(KEY_V)) spawnType = WATER;
         else if (IsKeyPressed(KEY_B)) spawnType = WOOD;
+        else if (IsKeyPressed(KEY_N)) spawnType = SMOKE;
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             int mx = GetMouseX();
             int my = GetMouseY();
@@ -64,13 +66,16 @@ int main()
                 for (int dy = -5; dy <= 5; dy++) {
                     switch (spawnType) {
                         case SAND:
-                            world->SpawnElement(mx, my, new Sand());
+                            world->SpawnElement(mx + dx, my + dy, new Sand());
                             break;
                         case WATER:
                             world->SpawnElement(mx + dx, my + dy, new Water());
                             break;
                         case WOOD:
                             world->SpawnElement(mx + dx, my + dy, new Wood());
+                            break;
+                        case SMOKE:
+                            world->SpawnElement(mx + dx, my + dy, new Smoke());
                             break;
                     }
                 }
@@ -112,39 +117,19 @@ int main()
         static bool flip = false;
         flip = !flip;
 
-
-        // if (IsKeyPressed(KEY_F)) {
-        //     if (!flip) {
-        //         for (int x = 0; x < world->width; ++x) {
-        //             size_t i = lastY * world->width + x;
-        //             if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
-        //             world->map[i]->hasSteppedThisFrame = true;
-        //             world->map[i]->Step();
-        //         }
-        //     } else {
-        //         for (int x = world->width - 1; x >= 0; --x) {
-        //             size_t i = lastY * world->width + x;
-        //             if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
-        //             world->map[i]->hasSteppedThisFrame = true;
-        //             world->map[i]->Step();
-        //         }
-        //     }
-        //     lastY--;
-        //     if (lastY < 0) lastY = world->height - 1;
-        // }
         for (int y = world->height - 1; y >= 0; --y) {
 
             if (!flip) {
                 for (int x = 0; x < world->width; ++x) {
                     size_t i = y * world->width + x;
-                    if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
+                    if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame || !world->map[i]->isActive) continue;
                     world->map[i]->hasSteppedThisFrame = true;
                     world->map[i]->Step();
                 }
             } else {
                 for (int x = world->width - 1; x >= 0; --x) {
                     size_t i = y * world->width + x;
-                    if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame) continue;
+                    if (world->map[i] == nullptr || world->map[i]->hasSteppedThisFrame || !world->map[i]->isActive) continue;
                     world->map[i]->hasSteppedThisFrame = true;
                     world->map[i]->Step();
                 }

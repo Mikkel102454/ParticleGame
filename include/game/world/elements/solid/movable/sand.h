@@ -7,9 +7,12 @@
 #include "raylib.h"
 #include "game/world/elements/solid/movable.h"
 
-struct Sand : Movable {
+typedef struct Sand : Movable {
     Color GetColor() const override{
         return ORANGE;
+    }
+    float GetMass() const override{
+        return 10.0f;
     }
 
     void ReceiveHeat() override{
@@ -18,6 +21,6 @@ struct Sand : Movable {
 
     void Step() override;
     bool goDiagonal(int direction);
-};
+} Sand;
 
 #endif //UNA_SAND_H
